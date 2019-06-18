@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop
+        https://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd
+         http://www.springframework.org/schema/tx
+         http://www.springframework.org/schema/tx/spring-tx.xsd">
+    <!-- bean definitions here -->
+    <!--控制反转start-->
+    <bean id="person" class="com.hch.entity.Person"></bean>
+    <bean id="animal" class="com.hch.entity.Animal"></bean>
+    <bean id="say" class="com.hch.service.impl.Say">
+        <property name="sayer" ref="person"></property>
+    </bean>
+    <!--控制反转end-->
+    <!--依赖注入start-->
+    <!--1 属性注入-->
+    <bean id="person1" class="com.hch.entity.Person">
+        <property name="age" value="1"></property>
+        <property name="name" value="黄长合"></property>
+        <property name="code" value="001"></property>
+    </bean>
+    <!--2 构造器注入-->
+    <!--参数类型-->
+    <bean id="person2" class="com.hch.entity.Person">
+        <constructor-arg type="int" value="3"></constructor-arg>
+        <constructor-arg type="java.lang.String" value="吴涛涛"></constructor-arg>
+        <constructor-arg type="int" value="002"></constructor-arg>
+    </bean>
+    <!--参数索引-->
+    <bean id="person3" class="com.hch.entity.Person">
+        <constructor-arg index="0" value="4"></constructor-arg>
+        <constructor-arg index="1" value="吴123涛"></constructor-arg>
+        <constructor-arg index="2" value="003"></constructor-arg>
+    </bean>
+    <!--联合使用-->
+    <bean id="person4" class="com.hch.entity.Person">
+        <constructor-arg index="0" type="int" value="453"></constructor-arg>
+        <constructor-arg index="1" type="java.lang.String" value="吴涛45涛"></constructor-arg>
+        <constructor-arg index="2" type="int" value="004"></constructor-arg>
+    </bean>
+    <!--3 工厂方法注入-->
+    <!--非静态-->
+    <bean id="factory" class="com.hch.entity.PersonFactory"></bean>
+    <bean id="person5" factory-bean="factory" factory-method="returnPerson"></bean>
+    <!--静态-->
+    <bean id="person6" class="com.hch.entity.PersonFactory" factory-method="returnPersonStatic"></bean>
+
+    <!--4 -->
+    <!--依赖注入end-->
+
+    <!--5 自动装配：biName/byType/constructor:必须用带dog参数的构造器-->
+    <bean id="dog" class="com.hch.entity.Dog" scope="prototype">
+        <property name="age" value="5"></property>
+        <property name="name" value="Tom"></property>
+        <property name="weight" value="5"></property>
+    </bean>
+    <bean id="people" class="com.hch.entity.People" autowire="constructor">
+        <property name="name" value="hch"></property>
+        <property name="age" value="18"></property>
+        <property name="tel" value="1577923169"></property>
+    </bean>
+    <bean id="people2" class="com.hch.entity.People">
+        <property name="name" value="hch"></property>
+        <property name="age" value="18"></property>
+        <property name="tel" value="1577923169"></property>
+        <!--<lookup-method bean="dog" name="getDog"></lookup-method>-->
+    </bean>
+    <!--方法注入:多例：prototype ，方法注入：lookup-method -->
+    <!-- 自动装配 end-->
+    <!--方法替换-->
+    <!--6 继承:parent、依赖:depend-on、引用:ref -->
+    <bean id="authority" class="com.hch.entity.Authority"></bean>
+    <bean id="peopleAbstract" class="com.hch.entity.People" depends-on="authority">
+        <property name="name" value="hch"></property>
+        <property name="age" value="18"></property>
+        <property name="tel" value="1577923169"></property>
+        <property name="dog" ref="dog"></property>
+        <!--<lookup-method bean="dog" name="getDog"></lookup-method>-->
+    </bean>
+    <bean id="peopleChild" parent="peopleAbstract">
+        <property name="name" value="whl"></property>
+    </bean>
+    <!--6 继承:parent、依赖:depend-on、引用:ref  end -->
+    <!--7 作用域：-->
+    <!--1、singleton:单例模式-->
+    <!--2、prototype：每次从容器里面调用bean,都会返回一个新的bean-->
+    <!--3、request：每一个request请求都会返回一个新的bean-->
+    <!--4、session：同一个HTTP session域都会共享一个bean-->
+    <!--5、global session：同一个全局session共享一个bean-->
+    <!--6、application：同一个application共享一个bean-->
+
+
+    <!--7 作用域 end-->
+
+    <!--8  spring AOP :-->
+    <!--1、前置通知:-->
+    <!--2、后置通知:-->
+    <!--3、环绕通知:-->
+    <!--4、返回通知:-->
+    <!--5、异常通知:-->
+    <bean id="studentServiceAspect" class="com.hch.advice.StudentServiceAspect"></bean>
+
+    <bean id="studentService2" class="com.hch.service.impl.StudentServiceImpl"></bean>
+
+    <aop:config>
+        <aop:aspect id="studentServiceAspect" ref="studentServiceAspect">
+            <aop:pointcut id="bussiness" expression="execution(* com.hch.service.*.*(..))"></aop:pointcut>
+            <aop:before method="doBefore" pointcut-ref="bussiness"></aop:before>
+            <aop:after method="doAfter" pointcut-ref="bussiness"></aop:after>
+            <aop:around method="doAround" pointcut-ref="bussiness"></aop:around>
+            <aop:after-returning method="doAfterReturning" pointcut-ref="bussiness"></aop:after-returning>
+            <aop:after-throwing method="doAfterThrow" pointcut-ref="bussiness" throwing="ex"></aop:after-throwing>
+        </aop:aspect>
+    </aop:config>
+    <!--8 spring AOP end-->
+
+    <!--9 对JDBC的支持-->
+
+    <context:property-placeholder location="jdbc.properties"></context:property-placeholder>
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+        <!-- results in a setDriverClassName(String) call -->
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+    <bean id="studentDao" class="com.hch.dao.impl.StudentDaoImpl">
+        <property name="jdbcTemplate" ref="jdbcTemplate"></property>
+    </bean>
+
+    <bean id="studentService" class="com.hch.service.impl.StudentServiceImpl">
+        <property name="studenDao" ref="studentDao"></property>
+    </bean>
+    <!--9 对JDBC的支持 end-->
+
+    <!--10、声明式事务通知-->
+    <bean id="bankDao" class="com.hch.dao.impl.BankDaoImpl">
+        <property name="jdbcTemplate" ref="jdbcTemplate"></property>
+    </bean>
+    <bean id="bankService" class="com.hch.service.impl.BankServiceImpl">
+        <property name="bankDao" ref="bankDao"></property>
+    </bean>
+
+    <!--事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+    <!--声明事务通知-->
+    <tx:advice id="tx-advice" transaction-manager="transactionManager">
+        <tx:attributes><!--配置事务传播特性-->
+            <tx:method name="save*" propagation="REQUIRED"/>
+            <tx:method name="del*" propagation="REQUIRED"/>
+            <tx:method name="update*" propagation="REQUIRED"/>
+            <tx:method name="add*" propagation="REQUIRED"/>
+            <tx:method name="insert*" propagation="REQUIRED"/>
+            <tx:method name="edit*" propagation="REQUIRED"/>
+            <tx:method name="new*" propagation="REQUIRED"/>
+            <tx:method name="set*" propagation="REQUIRED"/>
+            <tx:method name="remove*" propagation="REQUIRED"/>
+            <tx:method name="delete*" propagation="REQUIRED"/>
+            <tx:method name="change*" propagation="REQUIRED"/>
+            <tx:method name="get*" propagation="REQUIRED" read-only="true"/>
+            <tx:method name="find*" propagation="REQUIRED" read-only="true"/>
+            <tx:method name="load*" propagation="REQUIRED" read-only="true"/>
+            <tx:method name="*" propagation="REQUIRED" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--配置事务切面-->
+    <aop:config>
+        <aop:pointcut id="serviceAspect" expression="execution(* com.hch.service.*.*(..))"></aop:pointcut>
+        <aop:advisor advice-ref="tx-advice" pointcut-ref="serviceAspect"></aop:advisor>
+    </aop:config>
+
+    <!--另外一种方式，不用声明事务的切面，通过在BankServiceImpl类加入@Transcation注解来完成,同时在beans.xml-->
+    <!--加入<tx:annotation-driven transaction-manager="transactionManager"></tx:annotation-driven>事务管理器-->
+
+    <!--10、声明式事务通知 end-->
+</beans>
